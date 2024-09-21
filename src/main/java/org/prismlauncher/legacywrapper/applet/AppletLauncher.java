@@ -61,7 +61,7 @@ public final class AppletLauncher {
 		else
 			appletClass = findAppletClass();
 
-		Log.debug("Detected applet class " + appletClass.getName());
+		Log.debug("Constructing applet class: " + appletClass.getName());
 
 		MethodHandle constructor = MethodHandles.lookup().findConstructor(appletClass,
 				MethodType.methodType(void.class));
@@ -69,8 +69,6 @@ public final class AppletLauncher {
 
 		if (args.gameDir != null) {
 			try {
-				Log.debug("Patching game directory");
-
 				Class<?> mainClass;
 
 				if (args.mainClass != null)
@@ -78,13 +76,15 @@ public final class AppletLauncher {
 				else
 					mainClass = findMinecraftField(appletClass).getType();
 
-				Log.debug("Detected main class " + mainClass.getName());
+				Log.debug("Detected main class: " + mainClass.getName());
 
 				GameDirFix.patchGameDir(mainClass, new File(args.gameDir));
 			} catch (Throwable exception) {
 				Log.warning("Could not patch game directory", exception);
 			}
 		}
+
+		Log.debug("Starting applet");
 
 		AppletFrame frame = new AppletFrame(args, applet);
 		frame.start(args);
@@ -102,11 +102,17 @@ public final class AppletLauncher {
 	}
 
 	private static Field findMinecraftField(Class<?> appletClass) {
-		for (Field field : appletClass.getDeclaredFields())
-			if ((field.getType().getName().startsWith("net.minecraft.")
-					|| field.getType().getName().startsWith("com.mojang.") || !field.getType().getName().contains("."))
-					&& Arrays.asList(field.getType().getInterfaces()).contains(Runnable.class))
-				return field;
+		for (Field field : appletClass.getDeclaredFields()) {
+			if (!(field.getType().getName().startsWith("net.minecraft.")
+					|| field.getType().getName().startsWith("com.mojang.") || !field.getType().getName().contains(".")))
+				continue;
+
+			if (!Arrays.asList(field.getType().getInterfaces()).contains(Runnable.class))
+				continue;
+
+			Log.debug("Detected main class field: " + field);
+			return field;
+		}
 
 		throw new UnsupportedOperationException("Cannot find Minecraft field in " + appletClass);
 	}

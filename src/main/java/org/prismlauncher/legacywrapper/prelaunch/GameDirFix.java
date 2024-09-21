@@ -39,10 +39,17 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
+import org.prismlauncher.legacywrapper.common.logging.Log;
+
 public class GameDirFix {
 
 	public static void patchGameDir(Class<?> mainClass, File value) throws IllegalArgumentException, IllegalAccessException {
+		Log.debug("Patching game directory");
+
 		Field gameDirField = getGameDirField(mainClass);
+
+		Log.debug("Detected gameDir field: " + gameDirField);
+
 		gameDirField.setAccessible(true);
 		gameDirField.set(null, value);
 	}

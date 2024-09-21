@@ -97,6 +97,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.prismlauncher.legacywrapper.applet.AppletArguments;
+import org.prismlauncher.legacywrapper.common.logging.Log;
 
 /**
  * WARNING: This class is reflectively accessed by legacy Forge versions.
@@ -191,10 +192,12 @@ public class Launcher extends Applet implements AppletStub {
 
     @Override
     public String getParameter(String key) {
+    	Log.debug("Game requested parameter: " + key);
+
         String param = params.get(key);
 
         if (param != null)
-            return param;
+        	return param;
 
         try {
             return super.getParameter(key);

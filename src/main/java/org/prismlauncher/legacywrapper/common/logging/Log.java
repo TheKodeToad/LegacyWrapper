@@ -93,20 +93,43 @@ public final class Log {
 		if (level == LogLevel.DEBUG && !DEBUG_MODE)
 			return;
 
-		message = "[LegacyWrapper] " + level + ": " + message;
+		String decoratedMessage = "[LegacyWrapper] ";
+
+		if (DEBUG_MODE)
+			decoratedMessage += '(' + getCallingClass() + ") ";
+
+		decoratedMessage += level + ": " + message;
 
 		PrintStream out = level.error ? STDERR : STDOUT;
 
 		if (LEVEL_PREFIX_SUPPORTED) {
-			for (String line : message.split("\n")) {
+			for (String line : decoratedMessage.split("\n")) {
 				line = "!![" + level.name + "]!" + line;
 				out.println(line);
 			}
 		} else
-			out.println(message);
+			out.println(decoratedMessage);
 
 		if (exception != null)
 			exception.printStackTrace(STDERR);
+	}
+
+	private static String getCallingClass() {
+		try {
+			boolean foundMe = false;
+
+			for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+				if (element.getClassName().equals(Log.class.getName()))
+					foundMe = true;
+				else if (foundMe) {
+					String className = element.getClassName();
+					return className.substring(className.lastIndexOf('.') + 1);
+				}
+			}
+		} catch (SecurityException ignored) {
+		}
+
+		return "Unknown";
 	}
 
 }

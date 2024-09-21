@@ -52,14 +52,14 @@ public class PassthroughLauncher {
 
 		if (args.gameDir != null) {
 			try {
-				Log.debug("Patching game directory");
 				GameDirFix.patchGameDir(mainClass, new File(args.gameDir));
 			} catch (Throwable exception) {
-				Log.warning(
-						"Could not patch game directory. If this version supports the --gameDir option use it instead of --legacyWrapper.gameDir.",
-						exception);
+				Log.warning("Could not patch game directory:", exception);
+				Log.warning("If this version supports the --gameDir option use it instead of --legacyWrapper.gameDir");
 			}
 		}
+
+		Log.debug("Invoking main class: " + args.mainClass);
 
 		MethodHandle mainMethod = MethodHandles.lookup().findStatic(mainClass, "main",
 				MethodType.methodType(void.class, String[].class));
