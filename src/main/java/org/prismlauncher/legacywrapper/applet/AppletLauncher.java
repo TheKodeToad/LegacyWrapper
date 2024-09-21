@@ -41,6 +41,7 @@ import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 
 import org.prismlauncher.legacywrapper.common.logging.Log;
@@ -103,6 +104,9 @@ public final class AppletLauncher {
 
 	private static Field findMinecraftField(Class<?> appletClass) {
 		for (Field field : appletClass.getDeclaredFields()) {
+			if (Modifier.isStatic(field.getModifiers()))
+				continue;
+
 			if (!(field.getType().getName().startsWith("net.minecraft.")
 					|| field.getType().getName().startsWith("com.mojang.") || !field.getType().getName().contains(".")))
 				continue;
